@@ -45,12 +45,25 @@ const Game = (() => {
   let players = [];
   let currentPlayerIndex;
   let gameOver;
+  let isPlayingComputer;
+
+  const startComputer = () => {
+    isPlayingComputer = true;
+    start();
+  };
 
   const start = () => {
-    players = [
-      Player(document.querySelector('#player1').value, 'X'),
-      Player(document.querySelector('#player2').value, 'O'),
-    ];
+    if (isPlayingComputer) {
+      players = [
+        Player(document.querySelector('#player1').value, 'X'),
+        Player('Jarvis', 'O'),
+      ];
+    } else {
+      players = [
+        Player(document.querySelector('#player1').value, 'X'),
+        Player(document.querySelector('#player2').value, 'O'),
+      ];
+    }
 
     currentPlayerIndex = 0;
     gameOver = false;
@@ -59,6 +72,24 @@ const Game = (() => {
     squares.forEach((square) => {
       square.addEventListener('click', handleClick);
     });
+  };
+
+  const computerMove = () => {
+    let availableSpots;
+    let foundSpot = false;
+    // console.log(value);
+    while (foundSpot === false) {
+      availableSpots = Math.floor(Math.random() * 9);
+      value = document.querySelector(`#square-${availableSpots}`).innerHTML;
+
+      if (value !== '') {
+        foundSpot = false;
+      } else {
+        foundSpot = true;
+        document.querySelector(`#square-${availableSpots}`).click();
+        // return;
+      }
+    }
   };
 
   const handleClick = (event) => {
@@ -87,6 +118,12 @@ const Game = (() => {
     }
 
     currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+
+    if (isPlayingComputer && currentPlayerIndex === 1 && gameOver === false) {
+      setTimeout(() => {
+        computerMove();
+      }, 500);
+    }
   };
 
   const restart = () => {
@@ -99,7 +136,7 @@ const Game = (() => {
     displayController.renderMessage('');
   };
 
-  return { start, handleClick, restart };
+  return { start, handleClick, restart, computerMove, startComputer };
 })();
 
 function checkForWin(board) {
@@ -127,6 +164,13 @@ function checkForWin(board) {
 function checkForTie(board) {
   return board.every((cell) => cell !== '');
 }
+
+const computerButton = document.querySelector('#computer-button');
+
+computerButton.addEventListener('click', () => {
+  document.querySelector('#player2').style.display = 'none';
+  Game.startComputer();
+});
 
 const restartButton = document.querySelector('#restart-button');
 restartButton.addEventListener('click', () => {
